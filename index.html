@@ -399,48 +399,6 @@ tailwind.config = {
         </div>
       </div>
 
-      <!-- Propiedad Existente + Arriendo Notariado -->
-      <div class="bg-white rounded-xl shadow-sm border border-[#DDD9D0]/30 p-6">
-        <div class="flex items-center justify-between mb-4 pb-3 border-b border-[#DDD9D0]/50">
-          <div class="text-[11px] font-semibold text-accent2 uppercase tracking-widest">Propiedad Existente</div>
-          <button id="an-toggle-btn" onclick="toggleArriendoNotarial()"
-            class="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider px-3 py-1.5 rounded-full border transition-all duration-200 border-[#DDD9D0] text-muted bg-[#F0EEE9] hover:border-teal-300">
-            <span id="an-toggle-label">Arriendo Notariado</span>
-            <span id="an-toggle-dot" class="w-2 h-2 rounded-full bg-slate-300 transition-colors duration-200"></span>
-          </button>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div class="space-y-1.5">
-            <label class="text-[11px] font-semibold text-muted uppercase tracking-wider">Ingreso por Arriendo ($)</label>
-            <input class="w-full bg-[#F0EEE9] border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-teal-200 focus:outline-none"
-                   type="text" id="act-arr" value="0" inputmode="numeric" oninput="onlyDigits(this);calcEESS()">
-          </div>
-          <div class="space-y-1.5">
-            <label class="text-[11px] font-semibold text-muted uppercase tracking-wider">Cuota Dividendo ($)</label>
-            <input class="w-full bg-[#F0EEE9] border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-teal-200 focus:outline-none"
-                   type="text" id="act-div" value="0" inputmode="numeric" oninput="onlyDigits(this);calcEESS()">
-          </div>
-        </div>
-        <!-- Config arriendo notariado (oculto por defecto) -->
-        <div id="an-config" class="hidden mt-4 p-3 rounded-xl bg-teal-50 border border-teal-100 space-y-3">
-          <div class="flex items-center gap-3">
-            <div class="flex-1 space-y-1">
-              <label class="text-[11px] font-semibold text-muted uppercase tracking-wider">% Reconoce el banco</label>
-              <div class="flex items-center gap-2">
-                <input class="w-24 bg-white border-none rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-200 focus:outline-none"
-                       type="number" id="an-pct" value="70" step="5" min="0" max="100" oninput="calcEESS()">
-                <span class="text-xs text-muted">% del arriendo</span>
-              </div>
-            </div>
-            <div class="text-right">
-              <div class="text-[10px] text-muted uppercase tracking-wider">Deuda efectiva</div>
-              <div class="text-sm font-bold text-teal-700" id="an-deuda-efectiva">—</div>
-            </div>
-          </div>
-          <div class="text-[11px] text-teal-700" id="an-resumen">—</div>
-        </div>
-      </div>
-
       <!-- Ingresos con castigos -->
       <div class="bg-white rounded-xl shadow-sm border border-[#DDD9D0]/30 p-6">
         <div class="flex items-center justify-between mb-4 pb-3 border-b border-[#DDD9D0]/50">
@@ -451,7 +409,7 @@ tailwind.config = {
             <span id="liq-toggle-dot" class="w-2 h-2 rounded-full bg-slate-300 transition-colors duration-200"></span>
           </button>
         </div>
-        <div id="castigos-grid">
+        <div id="castigos-grid" style="max-height:600px;overflow:visible;opacity:1;transition:max-height 0.35s ease,opacity 0.25s ease">
         <div class="grid grid-cols-3 gap-3 mb-2">
           <div class="text-[10px] font-semibold text-muted uppercase tracking-wider">Tipo</div>
           <div class="text-[10px] font-semibold text-muted uppercase tracking-wider">Contrato ($)</div>
@@ -482,12 +440,38 @@ tailwind.config = {
                  type="text" id="cas-hon" readonly>
         </div>
         <!-- Bonos -->
-        <div class="grid grid-cols-3 gap-3 items-center mb-4">
+        <div class="grid grid-cols-3 gap-3 items-center mb-3">
           <div class="text-sm font-medium">Bonos <span class="text-[10px] text-muted">(÷12)</span></div>
           <input class="w-full bg-[#F0EEE9] border-none rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-teal-200 focus:outline-none"
                  type="text" id="ing-bono" value="0" inputmode="numeric" oninput="onlyDigits(this);calcEESS()">
           <input class="w-full computed rounded-lg px-3 py-2.5 text-sm border-2 border-dashed border-[#DDD9D0]"
                  type="text" id="cas-bono" readonly>
+        </div>
+        <!-- Arriendo propio (sin deuda hipotecaria) -->
+        <div class="grid grid-cols-3 gap-3 items-center mb-3">
+          <div class="text-sm font-medium">Arriendo Propio <span class="text-[10px] text-muted">(70%)</span></div>
+          <input class="w-full bg-[#F0EEE9] border-none rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-teal-200 focus:outline-none"
+                 type="text" id="ing-arr" value="0" inputmode="numeric" oninput="onlyDigits(this);calcEESS()"
+                 placeholder="0">
+          <input class="w-full computed rounded-lg px-3 py-2.5 text-sm border-2 border-dashed border-[#DDD9D0]"
+                 type="text" id="cas-arr" readonly>
+        </div>
+        <!-- Otros ingresos (fila libre, castigo configurable) -->
+        <div class="grid grid-cols-3 gap-3 items-center mb-4">
+          <div class="flex items-baseline gap-0.5 min-w-0">
+            <input class="text-sm font-medium bg-transparent border-none focus:outline-none p-0 min-w-0 flex-1 cursor-text hover:opacity-70 transition-opacity"
+                   type="text" id="ing-otros-label" value="Otros Ingresos" placeholder="Otros ingresos"
+                   title="Clic para editar nombre">
+            <span class="text-[10px] text-muted shrink-0">&thinsp;(</span>
+            <input class="text-[10px] text-muted bg-transparent border-none focus:outline-none p-0 text-center shrink-0 cursor-text"
+                   style="width:2.4em" type="number" id="ing-otros-pct" value="100" min="0" max="100"
+                   oninput="calcEESS()" title="% castigo bancario">
+            <span class="text-[10px] text-muted shrink-0">%)</span>
+          </div>
+          <input class="w-full bg-[#F0EEE9] border-none rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-teal-200 focus:outline-none"
+                 type="text" id="ing-otros" value="0" inputmode="numeric" oninput="onlyDigits(this);calcEESS()">
+          <input class="w-full computed rounded-lg px-3 py-2.5 text-sm border-2 border-dashed border-[#DDD9D0]"
+                 type="text" id="cas-otros" readonly>
         </div>
         <div class="border-t border-dashed border-[#DDD9D0] pt-3">
           <div class="grid grid-cols-3 gap-3 items-center">
@@ -500,8 +484,8 @@ tailwind.config = {
         </div><!-- /castigos-grid -->
       </div>
 
-      <!-- Renta promedio liquidaciones -->
-      <div class="bg-white rounded-xl shadow-sm border border-[#DDD9D0]/30 p-6" id="liq-card">
+      <!-- Renta promedio liquidaciones (oculto hasta activar toggle) -->
+      <div class="bg-white rounded-xl shadow-sm border border-[#DDD9D0]/30 p-6 hidden" id="liq-card">
         <div class="text-[11px] font-semibold text-accent2 uppercase tracking-widest mb-4 pb-3 border-b border-[#DDD9D0]/50">Renta Promedio (Liquidaciones)</div>
         <div class="grid grid-cols-3 gap-3 mb-3">
           <div class="space-y-1.5"><label class="text-[11px] font-semibold text-muted uppercase tracking-wider">Mes 1</label>
@@ -528,18 +512,73 @@ tailwind.config = {
       <!-- Deudas -->
       <div class="bg-white rounded-xl shadow-sm border border-[#DDD9D0]/30 p-6">
         <div class="text-[11px] font-semibold text-accent2 uppercase tracking-widest mb-4 pb-3 border-b border-[#DDD9D0]/50">Deudas Vigentes</div>
-        <div class="grid grid-cols-3 gap-3 mb-2">
+        <div class="grid mb-2" style="grid-template-columns:1fr 1fr 1fr auto;gap:8px">
           <div class="text-[10px] font-semibold text-muted uppercase tracking-wider">Tipo</div>
           <div class="text-[10px] font-semibold text-muted uppercase tracking-wider">Cuota Mensual ($)</div>
-          <div class="text-[10px] font-semibold text-muted uppercase tracking-wider">N° Cuotas Pendientes</div>
+          <div class="text-[10px] font-semibold text-muted uppercase tracking-wider">N° Cuotas</div>
+          <div></div>
         </div>
         <div id="deudas-rows" class="space-y-2">
-          <div class="grid grid-cols-3 gap-3 items-center"><div class="text-sm">Hipotecario 1</div>
-            <input class="w-full bg-[#F0EEE9] border-none rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-200 focus:outline-none" type="text" id="dh1c" value="0" inputmode="numeric" oninput="onlyDigits(this);calcEESS()">
-            <input class="w-full bg-[#F0EEE9] border-none rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-200 focus:outline-none" type="number" id="dh1n" value="0" oninput="calcEESS()"></div>
-          <div class="grid grid-cols-3 gap-3 items-center"><div class="text-sm">Hipotecario 2</div>
-            <input class="w-full bg-[#F0EEE9] border-none rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-200 focus:outline-none" type="text" id="dh2c" value="0" inputmode="numeric" oninput="onlyDigits(this);calcEESS()">
-            <input class="w-full bg-[#F0EEE9] border-none rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-200 focus:outline-none" type="number" id="dh2n" value="0" oninput="calcEESS()"></div>
+          <!-- Hipotecario 1 + toggle AN -->
+          <div>
+            <div class="grid items-center mb-1" style="grid-template-columns:1fr 1fr 1fr auto;gap:8px">
+              <div class="text-sm">Hipotecario 1</div>
+              <input class="w-full bg-[#F0EEE9] border-none rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-200 focus:outline-none" type="text" id="dh1c" value="0" inputmode="numeric" oninput="onlyDigits(this);calcEESS()">
+              <input class="w-full bg-[#F0EEE9] border-none rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-200 focus:outline-none" type="number" id="dh1n" value="0" oninput="calcEESS()">
+              <button onclick="toggleAN('dh1')" id="dh1-an-btn" title="Arriendo Notariado"
+                class="text-[9px] font-bold px-2 py-1.5 rounded-lg border border-[#DDD9D0] text-muted bg-[#F0EEE9] hover:border-teal-300 whitespace-nowrap transition-all">🏠 AN</button>
+            </div>
+            <div id="dh1-an-panel" class="hidden mt-1 px-2 py-2 rounded-lg bg-[#F0EEE9] border border-[#DDD9D0]/60">
+              <div class="grid items-center" style="grid-template-columns:1fr 1fr 1fr auto;gap:8px">
+                <div class="text-[9px] text-muted uppercase tracking-wider pl-1 leading-snug">Arriendo<br>Notariado</div>
+                <div class="space-y-0.5">
+                  <div class="text-[9px] text-muted uppercase tracking-wider">Arriendo ($)</div>
+                  <input class="w-full bg-white border border-[#DDD9D0] rounded-md px-2 py-1 text-xs focus:ring-1 focus:ring-accent2/30 focus:outline-none" type="text" id="dh1-arr" value="0" inputmode="numeric" oninput="onlyDigits(this);calcEESS()">
+                </div>
+                <div class="space-y-0.5">
+                  <div class="text-[9px] text-muted uppercase tracking-wider">% Banco reconoce</div>
+                  <div class="flex items-center gap-1">
+                    <input class="w-full bg-white border border-[#DDD9D0] rounded-md px-2 py-1 text-xs text-center focus:ring-1 focus:ring-accent2/30 focus:outline-none" type="number" id="dh1-an-pct" value="70" step="5" min="0" max="100" oninput="calcEESS()">
+                    <span class="text-[9px] text-muted shrink-0">%</span>
+                  </div>
+                </div>
+                <div class="space-y-0.5 text-right">
+                  <div class="text-[9px] text-muted uppercase tracking-wider whitespace-nowrap">Deuda efectiva</div>
+                  <div class="text-xs font-bold text-accent2 whitespace-nowrap" id="dh1-an-neta">—</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Hipotecario 2 + toggle AN -->
+          <div>
+            <div class="grid items-center mb-1" style="grid-template-columns:1fr 1fr 1fr auto;gap:8px">
+              <div class="text-sm">Hipotecario 2</div>
+              <input class="w-full bg-[#F0EEE9] border-none rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-200 focus:outline-none" type="text" id="dh2c" value="0" inputmode="numeric" oninput="onlyDigits(this);calcEESS()">
+              <input class="w-full bg-[#F0EEE9] border-none rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-200 focus:outline-none" type="number" id="dh2n" value="0" oninput="calcEESS()">
+              <button onclick="toggleAN('dh2')" id="dh2-an-btn" title="Arriendo Notariado"
+                class="text-[9px] font-bold px-2 py-1.5 rounded-lg border border-[#DDD9D0] text-muted bg-[#F0EEE9] hover:border-teal-300 whitespace-nowrap transition-all">🏠 AN</button>
+            </div>
+            <div id="dh2-an-panel" class="hidden mt-1 px-2 py-2 rounded-lg bg-[#F0EEE9] border border-[#DDD9D0]/60">
+              <div class="grid items-center" style="grid-template-columns:1fr 1fr 1fr auto;gap:8px">
+                <div class="text-[9px] text-muted uppercase tracking-wider pl-1 leading-snug">Arriendo<br>Notariado</div>
+                <div class="space-y-0.5">
+                  <div class="text-[9px] text-muted uppercase tracking-wider">Arriendo ($)</div>
+                  <input class="w-full bg-white border border-[#DDD9D0] rounded-md px-2 py-1 text-xs focus:ring-1 focus:ring-accent2/30 focus:outline-none" type="text" id="dh2-arr" value="0" inputmode="numeric" oninput="onlyDigits(this);calcEESS()">
+                </div>
+                <div class="space-y-0.5">
+                  <div class="text-[9px] text-muted uppercase tracking-wider">% Banco reconoce</div>
+                  <div class="flex items-center gap-1">
+                    <input class="w-full bg-white border border-[#DDD9D0] rounded-md px-2 py-1 text-xs text-center focus:ring-1 focus:ring-accent2/30 focus:outline-none" type="number" id="dh2-an-pct" value="70" step="5" min="0" max="100" oninput="calcEESS()">
+                    <span class="text-[9px] text-muted shrink-0">%</span>
+                  </div>
+                </div>
+                <div class="space-y-0.5 text-right">
+                  <div class="text-[9px] text-muted uppercase tracking-wider whitespace-nowrap">Deuda efectiva</div>
+                  <div class="text-xs font-bold text-accent2 whitespace-nowrap" id="dh2-an-neta">—</div>
+                </div>
+              </div>
+            </div>
+          </div>
           <div class="grid grid-cols-3 gap-3 items-center"><div class="text-sm">Consumo 1</div>
             <input class="w-full bg-[#F0EEE9] border-none rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-200 focus:outline-none" type="text" id="dc1c" value="0" inputmode="numeric" oninput="onlyDigits(this);calcEESS()">
             <input class="w-full bg-[#F0EEE9] border-none rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-200 focus:outline-none" type="number" id="dc1n" value="0" oninput="calcEESS()"></div>
@@ -549,6 +588,14 @@ tailwind.config = {
           <div class="grid grid-cols-3 gap-3 items-center"><div class="text-sm">Automotriz</div>
             <input class="w-full bg-[#F0EEE9] border-none rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-200 focus:outline-none" type="text" id="da1c" value="0" inputmode="numeric" oninput="onlyDigits(this);calcEESS()">
             <input class="w-full bg-[#F0EEE9] border-none rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-200 focus:outline-none" type="number" id="da1n" value="0" oninput="calcEESS()"></div>
+          <!-- Otras deudas (fila libre) -->
+          <div class="grid grid-cols-3 gap-3 items-center">
+            <input class="text-sm bg-transparent border-none focus:outline-none p-0 w-full cursor-text hover:opacity-70 transition-opacity"
+                   type="text" id="dot1-label" value="Otras Deudas" placeholder="Otras deudas"
+                   title="Clic para editar nombre">
+            <input class="w-full bg-[#F0EEE9] border-none rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-200 focus:outline-none" type="text" id="dot1c" value="0" inputmode="numeric" oninput="onlyDigits(this);calcEESS()">
+            <input class="w-full bg-[#F0EEE9] border-none rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-200 focus:outline-none" type="number" id="dot1n" value="0" oninput="calcEESS()">
+          </div>
         </div>
         <div class="border-t border-dashed border-[#DDD9D0] pt-3 mt-3">
           <div class="grid grid-cols-3 gap-3 items-center">
@@ -1395,8 +1442,10 @@ function fmtClp(n) {
   return '$'+new Intl.NumberFormat('es-CL',{maximumFractionDigits:0}).format(n);
 }
 function onlyDigits(el) {
-  const cleaned = el.value.replace(/[^0-9]/g,'');
-  el.value = cleaned;
+  const raw = el.value.replace(/[^0-9]/g,'');
+  if(!raw){ el.value=''; return; }
+  const num = parseInt(raw,10);
+  el.value = isNaN(num) ? '' : new Intl.NumberFormat('es-CL',{maximumFractionDigits:0}).format(num);
 }
 function v(id) {
   const el = document.getElementById(id);
@@ -1623,8 +1672,24 @@ function syncAbonoFromPCT(){
 
 
 // ── Estado toggles ───────────────────────────────
-let liqModeActive       = false;
-let arriendoNotarialOn  = false;
+let liqModeActive = false;
+const anState = { dh1: false, dh2: false };
+
+function toggleAN(id){
+  anState[id] = !anState[id];
+  const panel = document.getElementById(id+'-an-panel');
+  const btn   = document.getElementById(id+'-an-btn');
+  if(anState[id]){
+    panel.classList.remove('hidden');
+    btn.classList.add('border-accent2','text-accent2','bg-[#e8f0f0]');
+    btn.classList.remove('text-muted','bg-[#F0EEE9]','border-[#DDD9D0]');
+  } else {
+    panel.classList.add('hidden');
+    btn.classList.remove('border-accent2','text-accent2','bg-[#e8f0f0]');
+    btn.classList.add('text-muted','bg-[#F0EEE9]','border-[#DDD9D0]');
+  }
+  calcEESS();
+}
 
 function toggleLiqMode(){
   liqModeActive = !liqModeActive;
@@ -1635,43 +1700,29 @@ function toggleLiqMode(){
   const btn     = document.getElementById('liq-toggle-btn');
   if(liqModeActive){
     dot.classList.replace('bg-slate-300','bg-teal-400');
-    btn.classList.add('border-teal-400','text-teal-700');
-    titulo.textContent = 'Ingresos y Castigos Bancarios (inactivo)';
-    if(castigos) castigos.style.opacity = '0.35';
-    if(liqCard)  liqCard.classList.add('ring-2','ring-teal-300');
+    btn.classList.add('border-accent2','text-accent2');
+    titulo.textContent = 'Ingresos y Castigos Bancarios';
+    if(castigos){ castigos.style.maxHeight='0'; castigos.style.overflow='hidden'; castigos.style.opacity='0'; castigos.style.transition='max-height 0.35s ease, opacity 0.25s ease'; }
+    if(liqCard)  liqCard.classList.remove('hidden');
   } else {
     dot.classList.replace('bg-teal-400','bg-slate-300');
-    btn.classList.remove('border-teal-400','text-teal-700');
+    btn.classList.remove('border-accent2','text-accent2');
     titulo.textContent = 'Ingresos y Castigos Bancarios';
-    if(castigos) castigos.style.opacity = '1';
-    if(liqCard)  liqCard.classList.remove('ring-2','ring-teal-300');
+    if(castigos){ castigos.style.maxHeight='600px'; castigos.style.overflow='visible'; castigos.style.opacity='1'; castigos.style.transition='max-height 0.35s ease, opacity 0.25s ease'; }
+    if(liqCard)  liqCard.classList.add('hidden');
   }
   calcEESS();
 }
 
-function toggleArriendoNotarial(){
-  arriendoNotarialOn = !arriendoNotarialOn;
-  const dot    = document.getElementById('an-toggle-dot');
-  const config = document.getElementById('an-config');
-  const btn    = document.getElementById('an-toggle-btn');
-  if(arriendoNotarialOn){
-    dot.classList.replace('bg-slate-300','bg-teal-400');
-    btn.classList.add('border-teal-400','text-teal-700');
-    config.classList.remove('hidden');
-  } else {
-    dot.classList.replace('bg-teal-400','bg-slate-300');
-    btn.classList.remove('border-teal-400','text-teal-700');
-    config.classList.add('hidden');
-  }
-  calcEESS();
-}
 
 function calcEESS(){
-  const fijo = v('ing-fijo');
-  const vari = v('ing-var')*0.70;
-  const hon  = v('ing-hon')*0.60;
-  const bono = v('ing-bono')/12;
-  const totalCastigos = fijo+vari+hon+bono;
+  const fijo  = v('ing-fijo');
+  const vari  = v('ing-var')*0.70;
+  const hon   = v('ing-hon')*0.60;
+  const bono  = v('ing-bono')/12;
+  const arr   = v('ing-arr')*0.70;   // arriendo propio sin deuda, castigo 70%
+  const otros = v('ing-otros') * (v('ing-otros-pct') || 100) / 100;  // castigo configurable
+  const totalCastigos = fijo+vari+hon+bono+arr+otros;
 
   const liqVals=[v('liq1'),v('liq2'),v('liq3'),v('liq4'),v('liq5'),v('liq6')].filter(x=>x>0);
   const promLiq= liqVals.length?liqVals.reduce((a,b)=>a+b,0)/liqVals.length:0;
@@ -1679,17 +1730,25 @@ function calcEESS(){
   // Modo activo: castigos o liquidaciones
   const total = liqModeActive && promLiq > 0 ? promLiq : totalCastigos;
 
-  // Arriendo notariado: descuenta carga hipotecaria de propiedad arrendada
-  const actArr  = v('act-arr');
-  const actDiv  = v('act-div');
-  const anPct   = (v('an-pct') || 70) / 100;
-  let   deudaAN = 0;
-  if(arriendoNotarialOn && actDiv > 0){
-    const descuento = Math.min(actDiv, actArr * anPct);
-    deudaAN = Math.max(0, actDiv - descuento);
+  // Arriendo Notariado por hipotecario — calcula deuda efectiva de cada uno
+  function calcHipAN(prefix){
+    const cuota = v(prefix+'c');
+    if(!anState[prefix] || cuota===0) return cuota;
+    const arrAN  = v(prefix+'-arr');
+    const pctAN  = (v(prefix+'-an-pct') || 70) / 100;
+    const desc   = Math.min(cuota, arrAN * pctAN);
+    const neta   = Math.max(0, cuota - desc);
+    const netaEl = document.getElementById(prefix+'-an-neta');
+    if(netaEl) netaEl.textContent = fmtClp(Math.round(neta))+'/mes';
+    return neta;
   }
+  const dh1neta = calcHipAN('dh1');
+  const dh2neta = calcHipAN('dh2');
+  // Si AN no está activo, mostrar "—" en el resultado
+  if(!anState['dh1']){ const el=document.getElementById('dh1-an-neta'); if(el) el.textContent='—'; }
+  if(!anState['dh2']){ const el=document.getElementById('dh2-an-neta'); if(el) el.textContent='—'; }
 
-  const totalDeuda=v('dh1c')+v('dh2c')+v('dc1c')+v('dc2c')+v('da1c') + deudaAN;
+  const totalDeuda = dh1neta + dh2neta + v('dc1c')+v('dc2c')+v('da1c')+v('dot1c');
 
   const capHip     = total<3000000?total*0.25:total*0.33;
   const capCons    = total<3000000?total*0.15:total*0.20;
@@ -1710,21 +1769,11 @@ function calcEESS(){
   setFmtInput('cas-var',       vari);
   setFmtInput('cas-hon',       hon);
   setFmtInput('cas-bono',      bono);
+  setFmtInput('cas-arr',       arr);
+  setFmtInput('cas-otros',     otros);
   setFmtInput('total-liq',     liqModeActive && promLiq > 0 ? promLiq : totalCastigos);
   setFmtInput('prom-liq',      promLiq);
   setFmtInput('total-deuda-c', totalDeuda);
-
-  // Resumen arriendo notariado
-  const anResEl  = document.getElementById('an-resumen');
-  const anDeudaEl= document.getElementById('an-deuda-efectiva');
-  if(arriendoNotarialOn && actDiv > 0 && anResEl){
-    const descuento = Math.min(actDiv, actArr * anPct);
-    anResEl.textContent  = `Arriendo reconocido: ${fmtClp(Math.round(actArr*anPct))} / Descuento sobre dividendo: ${fmtClp(Math.round(descuento))}`;
-    if(anDeudaEl) anDeudaEl.textContent = fmtClp(Math.round(deudaAN)) + '/mes';
-  } else if(anResEl){
-    anResEl.textContent = '';
-    if(anDeudaEl) anDeudaEl.textContent = '—';
-  }
 
   // Progress
   let prog = 0;
@@ -2093,20 +2142,21 @@ function generarFicha() {
   const civil     = document.getElementById('civil')?.value     || '—';
   const profesion = document.getElementById('profesion')?.value || '—';
 
-  const actBR   = v('act-br');
-  const actVeh  = v('act-veh');
-  const actArr  = v('act-arr');
-  const actDiv  = v('act-div');
-
-  const ingFijo = v('ing-fijo');
-  const ingVar  = v('ing-var');
-  const ingHon  = v('ing-hon');
-  const ingBono = v('ing-bono');
-  const casFijo = ingFijo;
-  const casVar  = ingVar  * 0.70;
-  const casHon  = ingHon  * 0.60;
-  const casBono = ingBono / 12;
-  const totalLiq = casFijo + casVar + casHon + casBono;
+  const ingFijo  = v('ing-fijo');
+  const ingVar   = v('ing-var');
+  const ingHon   = v('ing-hon');
+  const ingBono  = v('ing-bono');
+  const ingArr   = v('ing-arr');
+  const ingOtros = v('ing-otros');
+  const ingOtrosPct = (v('ing-otros-pct') || 100) / 100;
+  const ingOtrosLabel = document.getElementById('ing-otros-label')?.value || 'Otros Ingresos';
+  const casFijo  = ingFijo;
+  const casVar   = ingVar  * 0.70;
+  const casHon   = ingHon  * 0.60;
+  const casBono  = ingBono / 12;
+  const casArr   = ingArr  * 0.70;
+  const casOtros = ingOtros * ingOtrosPct;
+  const totalLiq = casFijo + casVar + casHon + casBono + casArr + casOtros;
 
   const liqVals = [v('liq1'),v('liq2'),v('liq3'),v('liq4'),v('liq5'),v('liq6')].filter(x=>x>0);
   const promLiq = liqVals.length ? liqVals.reduce((a,b)=>a+b,0)/liqVals.length : 0;
@@ -2116,7 +2166,11 @@ function generarFicha() {
   const dc1c = v('dc1c'); const dc1n = v('dc1n');
   const dc2c = v('dc2c'); const dc2n = v('dc2n');
   const da1c = v('da1c'); const da1n = v('da1n');
-  const totalDeuda = dh1c+dh2c+dc1c+dc2c+da1c;
+  const dot1c = v('dot1c'); const dot1n = v('dot1n');
+  const dot1Label = document.getElementById('dot1-label')?.value || 'Otras Deudas';
+  const dh1neta_cot = anState['dh1'] ? Math.max(0, dh1c - Math.min(dh1c, v('dh1-arr')*(v('dh1-an-pct')||70)/100)) : dh1c;
+  const dh2neta_cot = anState['dh2'] ? Math.max(0, dh2c - Math.min(dh2c, v('dh2-arr')*(v('dh2-an-pct')||70)/100)) : dh2c;
+  const totalDeuda = dh1neta_cot+dh2neta_cot+dc1c+dc2c+da1c+dot1c;
 
   const capHip     = totalLiq < 3000000 ? totalLiq*0.25 : totalLiq*0.33;
   const capRealHip = Math.max(capHip - totalDeuda, 0);
@@ -2285,10 +2339,12 @@ function generarFicha() {
         <tr><th>Tipo de Ingreso</th><th style="text-align:right">Contrato</th><th style="text-align:right">Castigo</th><th style="text-align:right">Valor Castigado</th></tr>
       </thead>
       <tbody>
-        ${ingFijo > 0 ? `<tr><td>Sueldo Fijo</td><td class="num">${fmtClp(ingFijo)}</td><td class="castigo" style="text-align:right">100%</td><td class="num">${fmtClp(casFijo)}</td></tr>` : ''}
-        ${ingVar  > 0 ? `<tr><td>Sueldo Variable</td><td class="num">${fmtClp(ingVar)}</td><td class="castigo" style="text-align:right">70%</td><td class="num">${fmtClp(casVar)}</td></tr>` : ''}
-        ${ingHon  > 0 ? `<tr><td>Honorarios / Boletas</td><td class="num">${fmtClp(ingHon)}</td><td class="castigo" style="text-align:right">60%</td><td class="num">${fmtClp(casHon)}</td></tr>` : ''}
-        ${ingBono > 0 ? `<tr><td>Bono Anual</td><td class="num">${fmtClp(ingBono)}</td><td class="castigo" style="text-align:right">÷12 meses</td><td class="num">${fmtClp(casBono)}</td></tr>` : ''}
+        ${ingFijo  > 0 ? `<tr><td>Sueldo Fijo</td><td class="num">${fmtClp(ingFijo)}</td><td class="castigo" style="text-align:right">100%</td><td class="num">${fmtClp(casFijo)}</td></tr>` : ''}
+        ${ingVar   > 0 ? `<tr><td>Sueldo Variable</td><td class="num">${fmtClp(ingVar)}</td><td class="castigo" style="text-align:right">70%</td><td class="num">${fmtClp(casVar)}</td></tr>` : ''}
+        ${ingHon   > 0 ? `<tr><td>Honorarios / Boletas</td><td class="num">${fmtClp(ingHon)}</td><td class="castigo" style="text-align:right">60%</td><td class="num">${fmtClp(casHon)}</td></tr>` : ''}
+        ${ingBono  > 0 ? `<tr><td>Bono Anual</td><td class="num">${fmtClp(ingBono)}</td><td class="castigo" style="text-align:right">÷12 meses</td><td class="num">${fmtClp(casBono)}</td></tr>` : ''}
+        ${ingArr   > 0 ? `<tr><td>Arriendo Propio</td><td class="num">${fmtClp(ingArr)}</td><td class="castigo" style="text-align:right">70%</td><td class="num">${fmtClp(casArr)}</td></tr>` : ''}
+        ${ingOtros > 0 ? `<tr><td>${ingOtrosLabel}</td><td class="num">${fmtClp(ingOtros)}</td><td class="castigo" style="text-align:right">${Math.round(ingOtrosPct*100)}%</td><td class="num">${fmtClp(casOtros)}</td></tr>` : ''}
         <tr class="total-row"><td>Total Ingreso Líquido</td><td></td><td></td><td class="num">${fmtClp(totalLiq)}</td></tr>
       </tbody>
     </table>
@@ -2309,6 +2365,7 @@ function generarFicha() {
         ${deudaRow('Consumo 1', dc1c, dc1n)}
         ${deudaRow('Consumo 2', dc2c, dc2n)}
         ${deudaRow('Automotriz', da1c, da1n)}
+        ${dot1c > 0 ? deudaRow(dot1Label, dot1c, dot1n) : ''}
         <tr class="total-row"><td>Total Carga Mensual</td><td class="num">${fmtClp(totalDeuda)}/mes</td><td></td><td></td></tr>
       </tbody>
     </table>
