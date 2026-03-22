@@ -399,20 +399,17 @@ tailwind.config = {
         </div>
       </div>
 
-      <!-- Activos -->
+      <!-- Propiedad Existente + Arriendo Notariado -->
       <div class="bg-white rounded-xl shadow-sm border border-[#DDD9D0]/30 p-6">
-        <div class="text-[11px] font-semibold text-accent2 uppercase tracking-widest mb-4 pb-3 border-b border-[#DDD9D0]/50">Activos</div>
+        <div class="flex items-center justify-between mb-4 pb-3 border-b border-[#DDD9D0]/50">
+          <div class="text-[11px] font-semibold text-accent2 uppercase tracking-widest">Propiedad Existente</div>
+          <button id="an-toggle-btn" onclick="toggleArriendoNotarial()"
+            class="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider px-3 py-1.5 rounded-full border transition-all duration-200 border-[#DDD9D0] text-muted bg-[#F0EEE9] hover:border-teal-300">
+            <span id="an-toggle-label">Arriendo Notariado</span>
+            <span id="an-toggle-dot" class="w-2 h-2 rounded-full bg-slate-300 transition-colors duration-200"></span>
+          </button>
+        </div>
         <div class="grid grid-cols-2 gap-4">
-          <div class="space-y-1.5">
-            <label class="text-[11px] font-semibold text-muted uppercase tracking-wider">Bienes Raíces ($)</label>
-            <input class="w-full bg-[#F0EEE9] border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-teal-200 focus:outline-none"
-                   type="text" id="act-br" value="0" inputmode="numeric" oninput="onlyDigits(this);calcEESS()">
-          </div>
-          <div class="space-y-1.5">
-            <label class="text-[11px] font-semibold text-muted uppercase tracking-wider">Vehículo ($)</label>
-            <input class="w-full bg-[#F0EEE9] border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-teal-200 focus:outline-none"
-                   type="text" id="act-veh" value="0" inputmode="numeric" oninput="onlyDigits(this);calcEESS()">
-          </div>
           <div class="space-y-1.5">
             <label class="text-[11px] font-semibold text-muted uppercase tracking-wider">Ingreso por Arriendo ($)</label>
             <input class="w-full bg-[#F0EEE9] border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-teal-200 focus:outline-none"
@@ -424,11 +421,37 @@ tailwind.config = {
                    type="text" id="act-div" value="0" inputmode="numeric" oninput="onlyDigits(this);calcEESS()">
           </div>
         </div>
+        <!-- Config arriendo notariado (oculto por defecto) -->
+        <div id="an-config" class="hidden mt-4 p-3 rounded-xl bg-teal-50 border border-teal-100 space-y-3">
+          <div class="flex items-center gap-3">
+            <div class="flex-1 space-y-1">
+              <label class="text-[11px] font-semibold text-muted uppercase tracking-wider">% Reconoce el banco</label>
+              <div class="flex items-center gap-2">
+                <input class="w-24 bg-white border-none rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-200 focus:outline-none"
+                       type="number" id="an-pct" value="70" step="5" min="0" max="100" oninput="calcEESS()">
+                <span class="text-xs text-muted">% del arriendo</span>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-[10px] text-muted uppercase tracking-wider">Deuda efectiva</div>
+              <div class="text-sm font-bold text-teal-700" id="an-deuda-efectiva">—</div>
+            </div>
+          </div>
+          <div class="text-[11px] text-teal-700" id="an-resumen">—</div>
+        </div>
       </div>
 
       <!-- Ingresos con castigos -->
       <div class="bg-white rounded-xl shadow-sm border border-[#DDD9D0]/30 p-6">
-        <div class="text-[11px] font-semibold text-accent2 uppercase tracking-widest mb-4 pb-3 border-b border-[#DDD9D0]/50">Ingresos y Castigos Bancarios</div>
+        <div class="flex items-center justify-between mb-4 pb-3 border-b border-[#DDD9D0]/50">
+          <div class="text-[11px] font-semibold text-accent2 uppercase tracking-widest" id="ingresos-titulo">Ingresos y Castigos Bancarios</div>
+          <button id="liq-toggle-btn" onclick="toggleLiqMode()"
+            class="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider px-3 py-1.5 rounded-full border transition-all duration-200 border-[#DDD9D0] text-muted bg-[#F0EEE9] hover:border-teal-300">
+            <span>Usar Liquidaciones</span>
+            <span id="liq-toggle-dot" class="w-2 h-2 rounded-full bg-slate-300 transition-colors duration-200"></span>
+          </button>
+        </div>
+        <div id="castigos-grid">
         <div class="grid grid-cols-3 gap-3 mb-2">
           <div class="text-[10px] font-semibold text-muted uppercase tracking-wider">Tipo</div>
           <div class="text-[10px] font-semibold text-muted uppercase tracking-wider">Contrato ($)</div>
@@ -474,10 +497,11 @@ tailwind.config = {
                    type="text" id="total-liq" readonly>
           </div>
         </div>
+        </div><!-- /castigos-grid -->
       </div>
 
       <!-- Renta promedio liquidaciones -->
-      <div class="bg-white rounded-xl shadow-sm border border-[#DDD9D0]/30 p-6">
+      <div class="bg-white rounded-xl shadow-sm border border-[#DDD9D0]/30 p-6" id="liq-card">
         <div class="text-[11px] font-semibold text-accent2 uppercase tracking-widest mb-4 pb-3 border-b border-[#DDD9D0]/50">Renta Promedio (Liquidaciones)</div>
         <div class="grid grid-cols-3 gap-3 mb-3">
           <div class="space-y-1.5"><label class="text-[11px] font-semibold text-muted uppercase tracking-wider">Mes 1</label>
@@ -1598,17 +1622,74 @@ function syncAbonoFromPCT(){
 }
 
 
+// ── Estado toggles ───────────────────────────────
+let liqModeActive       = false;
+let arriendoNotarialOn  = false;
+
+function toggleLiqMode(){
+  liqModeActive = !liqModeActive;
+  const dot     = document.getElementById('liq-toggle-dot');
+  const titulo  = document.getElementById('ingresos-titulo');
+  const castigos= document.getElementById('castigos-grid');
+  const liqCard = document.getElementById('liq-card');
+  const btn     = document.getElementById('liq-toggle-btn');
+  if(liqModeActive){
+    dot.classList.replace('bg-slate-300','bg-teal-400');
+    btn.classList.add('border-teal-400','text-teal-700');
+    titulo.textContent = 'Ingresos y Castigos Bancarios (inactivo)';
+    if(castigos) castigos.style.opacity = '0.35';
+    if(liqCard)  liqCard.classList.add('ring-2','ring-teal-300');
+  } else {
+    dot.classList.replace('bg-teal-400','bg-slate-300');
+    btn.classList.remove('border-teal-400','text-teal-700');
+    titulo.textContent = 'Ingresos y Castigos Bancarios';
+    if(castigos) castigos.style.opacity = '1';
+    if(liqCard)  liqCard.classList.remove('ring-2','ring-teal-300');
+  }
+  calcEESS();
+}
+
+function toggleArriendoNotarial(){
+  arriendoNotarialOn = !arriendoNotarialOn;
+  const dot    = document.getElementById('an-toggle-dot');
+  const config = document.getElementById('an-config');
+  const btn    = document.getElementById('an-toggle-btn');
+  if(arriendoNotarialOn){
+    dot.classList.replace('bg-slate-300','bg-teal-400');
+    btn.classList.add('border-teal-400','text-teal-700');
+    config.classList.remove('hidden');
+  } else {
+    dot.classList.replace('bg-teal-400','bg-slate-300');
+    btn.classList.remove('border-teal-400','text-teal-700');
+    config.classList.add('hidden');
+  }
+  calcEESS();
+}
+
 function calcEESS(){
   const fijo = v('ing-fijo');
   const vari = v('ing-var')*0.70;
   const hon  = v('ing-hon')*0.60;
   const bono = v('ing-bono')/12;
-  const total= fijo+vari+hon+bono;
+  const totalCastigos = fijo+vari+hon+bono;
 
   const liqVals=[v('liq1'),v('liq2'),v('liq3'),v('liq4'),v('liq5'),v('liq6')].filter(x=>x>0);
   const promLiq= liqVals.length?liqVals.reduce((a,b)=>a+b,0)/liqVals.length:0;
 
-  const totalDeuda=v('dh1c')+v('dh2c')+v('dc1c')+v('dc2c')+v('da1c');
+  // Modo activo: castigos o liquidaciones
+  const total = liqModeActive && promLiq > 0 ? promLiq : totalCastigos;
+
+  // Arriendo notariado: descuenta carga hipotecaria de propiedad arrendada
+  const actArr  = v('act-arr');
+  const actDiv  = v('act-div');
+  const anPct   = (v('an-pct') || 70) / 100;
+  let   deudaAN = 0;
+  if(arriendoNotarialOn && actDiv > 0){
+    const descuento = Math.min(actDiv, actArr * anPct);
+    deudaAN = Math.max(0, actDiv - descuento);
+  }
+
+  const totalDeuda=v('dh1c')+v('dh2c')+v('dc1c')+v('dc2c')+v('da1c') + deudaAN;
 
   const capHip     = total<3000000?total*0.25:total*0.33;
   const capCons    = total<3000000?total*0.15:total*0.20;
@@ -1629,9 +1710,21 @@ function calcEESS(){
   setFmtInput('cas-var',       vari);
   setFmtInput('cas-hon',       hon);
   setFmtInput('cas-bono',      bono);
-  setFmtInput('total-liq',     total);
+  setFmtInput('total-liq',     liqModeActive && promLiq > 0 ? promLiq : totalCastigos);
   setFmtInput('prom-liq',      promLiq);
   setFmtInput('total-deuda-c', totalDeuda);
+
+  // Resumen arriendo notariado
+  const anResEl  = document.getElementById('an-resumen');
+  const anDeudaEl= document.getElementById('an-deuda-efectiva');
+  if(arriendoNotarialOn && actDiv > 0 && anResEl){
+    const descuento = Math.min(actDiv, actArr * anPct);
+    anResEl.textContent  = `Arriendo reconocido: ${fmtClp(Math.round(actArr*anPct))} / Descuento sobre dividendo: ${fmtClp(Math.round(descuento))}`;
+    if(anDeudaEl) anDeudaEl.textContent = fmtClp(Math.round(deudaAN)) + '/mes';
+  } else if(anResEl){
+    anResEl.textContent = '';
+    if(anDeudaEl) anDeudaEl.textContent = '—';
+  }
 
   // Progress
   let prog = 0;
