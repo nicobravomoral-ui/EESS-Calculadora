@@ -540,6 +540,43 @@ tailwind.config = {
     <!-- RIGHT COL (4) -->
     <div class="col-span-12 lg:col-span-4">
       <div class="sticky top-36 space-y-4">
+
+        <!-- ── GAUGE PERFIL CREDITICIO ── -->
+        <div class="bg-white rounded-2xl border border-[#DDD9D0]/30 p-5 shadow-sm text-center">
+          <div class="text-[10px] font-semibold text-muted uppercase tracking-widest mb-3">Perfil Crediticio</div>
+          <div class="flex flex-col items-center">
+            <div class="relative" style="width:190px;height:108px;overflow:visible">
+              <svg viewBox="0 0 200 115" width="190" height="108">
+                <!-- Tick marks -->
+                <line x1="20" y1="100" x2="12" y2="100" stroke="#DDD9D0" stroke-width="2" stroke-linecap="round"/>
+                <line x1="100" y1="20" x2="100" y2="10" stroke="#DDD9D0" stroke-width="2" stroke-linecap="round"/>
+                <line x1="180" y1="100" x2="188" y2="100" stroke="#DDD9D0" stroke-width="2" stroke-linecap="round"/>
+                <!-- Background track -->
+                <path d="M 20 100 A 80 80 0 0 1 180 100"
+                      fill="none" stroke="#F0EEE9" stroke-width="18" stroke-linecap="round"/>
+                <!-- Score fill -->
+                <path id="gauge-fill" d="M 20 100 A 80 80 0 0 1 180 100"
+                      fill="none" stroke="#D1D5DB" stroke-width="18" stroke-linecap="round"
+                      stroke-dasharray="251.3" stroke-dashoffset="251.3"
+                      style="transition:stroke-dashoffset 0.8s cubic-bezier(.4,0,.2,1),stroke 0.4s ease"/>
+                <!-- Score number -->
+                <text id="gauge-pct" x="100" y="90" text-anchor="middle"
+                      font-size="30" font-weight="800" fill="#1C3A3A" font-family="inherit">—</text>
+              </svg>
+            </div>
+            <!-- Etiqueta estado -->
+            <div id="gauge-label" class="text-sm font-bold mt-1" style="color:#9CA3AF">Ingresa datos</div>
+            <div id="gauge-sub" class="text-[11px] text-muted mt-0.5">para evaluar el perfil</div>
+            <!-- Mini escala -->
+            <div class="flex justify-between w-full px-1 mt-3" style="max-width:190px">
+              <span class="text-[9px] text-muted">Difícil</span>
+              <span class="text-[9px] text-muted">Ajustado</span>
+              <span class="text-[9px] text-muted">Bueno</span>
+              <span class="text-[9px] text-muted">Excelente</span>
+            </div>
+          </div>
+        </div>
+
         <div class="flex items-center gap-3 mb-1">
           <div class="w-1.5 h-6 bg-teal-200 rounded-full"></div>
           <h2 class="text-base font-headline font-bold text-primary">Diagnóstico</h2>
@@ -1623,6 +1660,41 @@ function calcEESS(){
   document.getElementById('diagnostico-eess').innerHTML=diags.map(([cls,label,val])=>
     `<div class="diag ${cls}"><span class="diag-label">${label}</span><span class="diag-value">${val}</span></div>`
   ).join('');
+
+  // ── GAUGE PERFIL CREDITICIO ──────────────────────
+  // Score 0-100 basado en DTI y cupo hipotecario disponible
+  const dtiComponent  = Math.max(0, 1 - dti / 0.33);   // dti 0%=1.0 · dti 33%=0
+  const cupoComponent = Math.max(0, 1 - cupoPct);        // cupo libre: 100%=1.0 · 0%=0
+  const eligScore = total > 0
+    ? Math.round(Math.min(100, (dtiComponent * 0.5 + cupoComponent * 0.5) * 100))
+    : 0;
+
+  const arcLen   = 251.3;
+  const gFill    = document.getElementById('gauge-fill');
+  const gPct     = document.getElementById('gauge-pct');
+  const gLabel   = document.getElementById('gauge-label');
+  const gSub     = document.getElementById('gauge-sub');
+
+  if (gFill) {
+    gFill.setAttribute('stroke-dashoffset', total > 0 ? arcLen * (1 - eligScore / 100) : arcLen);
+  }
+  if (gPct) gPct.textContent = total > 0 ? eligScore + '%' : '—';
+
+  let gColor, gLabelTxt, gSubTxt;
+  if (total === 0) {
+    gColor = '#9CA3AF'; gLabelTxt = 'Ingresa datos'; gSubTxt = 'para evaluar el perfil';
+  } else if (eligScore >= 75) {
+    gColor = '#10B981'; gLabelTxt = 'Excelente perfil'; gSubTxt = 'Alta capacidad hipotecaria';
+  } else if (eligScore >= 50) {
+    gColor = '#14B8A6'; gLabelTxt = 'Buen perfil'; gSubTxt = 'Capacidad disponible';
+  } else if (eligScore >= 25) {
+    gColor = '#F97316'; gLabelTxt = 'Perfil ajustado'; gSubTxt = 'Capacidad limitada por deudas';
+  } else {
+    gColor = '#EF4444'; gLabelTxt = 'Difícil acceso'; gSubTxt = 'Endeudamiento muy alto';
+  }
+  if (gFill)  gFill.setAttribute('stroke', gColor);
+  if (gLabel) { gLabel.textContent = gLabelTxt; gLabel.style.color = gColor; }
+  if (gSub)   gSub.textContent = gSubTxt;
 
   updateHUD();
 }
